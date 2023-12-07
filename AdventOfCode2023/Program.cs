@@ -8,6 +8,8 @@ namespace AdventOfCode2023
       {
          //Console.WriteLine( Day1.FirstPuzzle() );
          //Console.WriteLine( Day1.SecondPuzzle() );
+         //Console.WriteLine( Day2.FirstPuzzle() );
+         Console.WriteLine( Day2.SecondPuzzle() );
       }
    }
 }
