@@ -19,7 +19,6 @@ namespace AdventOfCode2023
          StreamReader reader = new StreamReader( Helper.GetInputDirectory( "day3input.txt" ) );
 
          int numberSum = 0;
-         char[] specialChars = new char[] { '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '?', '_', '=', ',', '<', '>', '/', '.' };
          List<string> grid = new List<string>();
          List<KeyValuePair<int, int>> symbolsList;
          grid.Add( reader.ReadLine() );
@@ -86,6 +85,83 @@ namespace AdventOfCode2023
          return numberSum;
       }
 
+      /*
+       * Locate all '*' symbols with only two adjacent numbers
+       * Multiply the two values together and sum all the results
+       * 
+       * Strategy:
+       *    1. Locate all '*' symbols and record kvp(index, line)
+       *    2. Start with 3 lines and keep track of all numbers adjacent to a discovered '*' symbol.
+       *    3. Iterate through list of discovered star symbols and pick out the ones with only 2 numbers adjacent and add to the total gearSum their multiplied values
+       *    4. Repeat process checking only line 2 until EOF
+       */
+      public static int SecondPuzzle()
+      {
+         StreamReader reader = new StreamReader( Helper.GetInputDirectory( "day3input.txt" ) );
+
+         int gearSum = 0;
+         bool isFirstRun = true;
+         List<string> grid = new List<string>();
+         grid.Add( reader.ReadLine() );
+         grid.Add( reader.ReadLine() );
+         grid.Add( reader.ReadLine() );
+         do
+         {
+            List<StarLocation> starSymbolLocations = new List<StarLocation>();
+            List<NumberLocation> numberLocations = new List<NumberLocation>();
+            if( isFirstRun )
+            {
+               for( int j = grid[ 0 ].IndexOf( '*' ); j > -1; j = grid[ 0 ].IndexOf( '*', j + 1 ) )
+               {
+                  starSymbolLocations.Add( new StarLocation( 0, j ) );
+               }
+
+               for( int j = grid[ 1 ].IndexOf( '*' ); j > -1; j = grid[ 1 ].IndexOf( '*', j + 1 ) )
+               {
+                  starSymbolLocations.Add( new StarLocation( 1, j ) );
+               }
+               isFirstRun = false;
+            }
+            else
+            {
+               for( int j = grid[ 1 ].IndexOf( '*' ); j > -1; j = grid[ 1 ].IndexOf( '*', j + 1 ) )
+               {
+                  starSymbolLocations.Add( new StarLocation( 1, j ) );
+               }
+            }
+            for( int i = 0; i < grid.Count; i++ )
+            {
+               foreach( Match match in Regex.Matches( grid[ i ], @"(?:\D|^|)(\d+)(?:\D|$)" ) )
+               {
+                  numberLocations.Add( new NumberLocation( i, match.Groups[ 1 ].Index, int.Parse( match.Groups[ 1 ].Value ) ) );
+               }
+            }
+
+            foreach( StarLocation star in starSymbolLocations )
+            {
+               foreach( NumberLocation number in numberLocations )
+               {
+                  if( IsAdjacentToStar( number, star ) )
+                  {
+                     star.AdjacentNums.Add( number.Number );
+                  }
+               }
+            }
+
+            foreach( StarLocation star in starSymbolLocations )
+            {
+               if( star.AdjacentNums.Count == 2 )
+               {
+                  gearSum += star.AdjacentNums[ 0 ] * star.AdjacentNums[ 1 ];
+               }
+            }
+            grid[ 0 ] = grid[ 1 ];
+            grid[ 1 ] = grid[ 2 ];
+         } while( ( grid[ 2 ] = reader.ReadLine() ) != null );
+
+         return gearSum;
+      }
+
       internal static bool IsAdjacent( KeyValuePair<KeyValuePair<int, int>, int> number, List<string> grid, List<KeyValuePair<int, int>> symbolsList )
       {
          /*
@@ -106,24 +182,15 @@ namespace AdventOfCode2023
                {
                   if( number.Key.Key == 0 )
                   {
-                     if( firstRowSymbolIndex == numEndIndex + 1 )
-                     {
-                        return true;
-                     }
+                     if( firstRowSymbolIndex == numEndIndex + 1 ) { return true; }
                   }
                   else if( numEndIndex + 1 == grid[ 0 ].Length )
                   {
-                     if( firstRowSymbolIndex == number.Key.Key - 1 )
-                     {
-                        return true;
-                     }
+                     if( firstRowSymbolIndex == number.Key.Key - 1 ) { return true; }
                   }
                   else
                   {
-                     if( ( firstRowSymbolIndex == numEndIndex + 1 ) || (firstRowSymbolIndex == number.Key.Key - 1 ) )
-                     {
-                        return true;
-                     }
+                     if( ( firstRowSymbolIndex == numEndIndex + 1 ) || (firstRowSymbolIndex == number.Key.Key - 1 ) ) { return true; }
                   }
                }
 
@@ -131,24 +198,15 @@ namespace AdventOfCode2023
                {
                   if( number.Key.Key == 0 )
                   {
-                     if( secondRowSymbolIndex >= number.Key.Key && secondRowSymbolIndex <= numEndIndex + 1 )
-                     {
-                        return true;
-                     }
+                     if( secondRowSymbolIndex >= number.Key.Key && secondRowSymbolIndex <= numEndIndex + 1 ) { return true; }
                   }
                   else if(numEndIndex + 1 == grid[ 0 ].Length )
                   {
-                     if( secondRowSymbolIndex >= number.Key.Key - 1 && secondRowSymbolIndex <= numEndIndex )
-                     {
-                        return true;
-                     }
+                     if( secondRowSymbolIndex >= number.Key.Key - 1 && secondRowSymbolIndex <= numEndIndex ) { return true; }
                   }
                   else
                   {
-                     if( secondRowSymbolIndex >= number.Key.Key - 1 && secondRowSymbolIndex <= numEndIndex + 1 )
-                     {
-                        return true;
-                     }
+                     if( secondRowSymbolIndex >= number.Key.Key - 1 && secondRowSymbolIndex <= numEndIndex + 1 ) { return true; }
                   }
                }
 
@@ -161,24 +219,15 @@ namespace AdventOfCode2023
                {
                   if( number.Key.Key == 0 )
                   {
-                     if( firstRowSymbolIndex >= number.Key.Key && firstRowSymbolIndex <= numEndIndex + 1 )
-                     {
-                        return true;
-                     }
+                     if( firstRowSymbolIndex >= number.Key.Key && firstRowSymbolIndex <= numEndIndex + 1 ) { return true; }
                   }
                   else if( numEndIndex + 1 == grid[ 0 ].Length )
                   {
-                     if( firstRowSymbolIndex >= number.Key.Key - 1 && firstRowSymbolIndex <= numEndIndex )
-                     {
-                        return true;
-                     }
+                     if( firstRowSymbolIndex >= number.Key.Key - 1 && firstRowSymbolIndex <= numEndIndex ) { return true; }
                   }
                   else
                   {
-                     if( firstRowSymbolIndex >= number.Key.Key - 1 && firstRowSymbolIndex <= numEndIndex + 1 )
-                     {
-                        return true;
-                     }
+                     if( firstRowSymbolIndex >= number.Key.Key - 1 && firstRowSymbolIndex <= numEndIndex + 1 ) { return true; }
                   }
                }
 
@@ -193,29 +242,86 @@ namespace AdventOfCode2023
             {
                if( number.Key.Key == 0 )
                {
-                  if( firstRowSymbolIndex == numEndIndex + 1 )
-                  {
-                     return true;
-                  }
+                  if( firstRowSymbolIndex == numEndIndex + 1 ) { return true; }
                }
                else if( numEndIndex + 1 == grid[ 0 ].Length )
                {
-                  if( firstRowSymbolIndex == number.Key.Key - 1 )
-                  {
-                     return true;
-                  }
+                  if( firstRowSymbolIndex == number.Key.Key - 1 ) { return true; }
                }
                else
                {
-                  if( ( firstRowSymbolIndex == numEndIndex + 1 ) || (firstRowSymbolIndex == number.Key.Key - 1 ) )
-                  {
-                     return true;
-                  }
+                  if( ( firstRowSymbolIndex == numEndIndex + 1 ) || (firstRowSymbolIndex == number.Key.Key - 1 ) ) { return true; }
                }
             }
 
             return false;
          }
+      }
+
+      internal static bool IsAdjacentToStar( NumberLocation number, StarLocation star )
+      {
+         int numMaxIndex = number.Index + number.Number.ToString().Length - 1;
+         if( star.Line == 1 ) 
+         {
+            if( number.Line != 1 ) // top or bottom lines (0 & 2)
+            {
+               if( star.Index >= number.Index - 1 && star.Index <= numMaxIndex + 1 ) { return true; }
+            }
+            else
+            {
+               if( star.Index == number.Index - 1 || star.Index == numMaxIndex + 1 ) { return true; }
+            }
+
+            return false;
+         }
+
+         if( star.Line == 0 ) // only in first run through (in hindsight completely unnecessary as input file doesn't include a * in first row, but anyways)
+         {
+            if( Math.Abs( number.Line - star.Line ) == 2 ) // case of first runthrough where checking number in 3rd row vs star in 1st
+            {
+               return false;
+            }
+
+            if( number.Line == 0 )
+            {
+               if( star.Index == number.Index - 1 || star.Index == numMaxIndex + 1 ) { return true; }
+            }
+            else // 1
+            {
+               if( star.Index >= number.Index - 1 && star.Index <= numMaxIndex + 1 ) { return true; }
+            }
+
+            return false;
+         }
+
+         return false;
+      }
+   }
+
+   internal class StarLocation
+   {
+      public int Line { get; init; }
+      public int Index { get; init; }
+      public List<int> AdjacentNums { get; set; } = new List<int>();
+
+      public StarLocation( int line, int index )
+      {
+         Line = line;
+         Index = index;
+      }
+   }
+
+   internal class NumberLocation
+   {
+      public int Line { get; init; }
+      public int Index { get; init; }
+      public int Number { get; init; }
+
+      public NumberLocation( int line, int index, int number )
+      {
+         Line = line;
+         Index = index;
+         Number = number;
       }
    }
 }
