@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace AdventOfCode2023
@@ -33,49 +32,49 @@ namespace AdventOfCode2023
              */
             symbolsList = new List<KeyValuePair<int, int>>();
             Dictionary<KeyValuePair<int, int>, int> numbersWithIndexList = new Dictionary<KeyValuePair<int, int>, int>(); // index, number
-            for( int i = 0; i < grid.Count; i++ )
+            for ( int i = 0; i < grid.Count; i++ )
             {
-               foreach( Match match in Regex.Matches( grid[ i ], @"[^.\d\s]" ) ) // match every non-period, non-digit, non-whitespace
+               foreach ( Match match in Regex.Matches( grid[ i ], @"[^.\d\s]" ) ) // match every non-period, non-digit, non-whitespace
                {
                   symbolsList.Add( new KeyValuePair<int, int>( i, match.Index ) ); // coords of all non-period symbols in the two lines
                }
 
-               foreach( Match match in Regex.Matches( grid[ i ], @"(?:\D|^|)(\d+)(?:\D|$)" ) ) // match every number that either has a symbol in front or behind it,
-                                                                                               // or is at the start or end of a line,
-                                                                                               // and last resort find zero-length match (ex: .664.598..) => [.664.][598.]
+               foreach ( Match match in Regex.Matches( grid[ i ], @"(?:\D|^|)(\d+)(?:\D|$)" ) ) // match every number that either has a symbol in front or behind it,
+                                                                                                // or is at the start or end of a line,
+                                                                                                // and last resort find zero-length match (ex: .664.598..) => [.664.][598.]
                {
                   numbersWithIndexList.Add( new KeyValuePair<int, int>( match.Groups[ 1 ].Index, int.Parse( match.Groups[ 1 ].Value ) ), i );
                }
             }
 
-            foreach( var number in numbersWithIndexList )
+            foreach ( var number in numbersWithIndexList )
             {
-               if( IsAdjacent( number, grid, symbolsList ) )
+               if ( IsAdjacent( number, grid, symbolsList ) )
                {
                   //Console.WriteLine( $"Adjacent number: {number.Key.Value}" );
                   numberSum += number.Key.Value;
                }
             }
-            
+
             grid[ 0 ] = grid[ 1 ];
-         } while( ( grid[ 1 ] = reader.ReadLine() ) != null );
+         } while ( ( grid[ 1 ] = reader.ReadLine() ) != null );
 
          // perform last cycle with last row only to look for horizontal adjacencies
          symbolsList = new List<KeyValuePair<int, int>>();
-         foreach( Match match in Regex.Matches( grid[ 0 ], @"[^.\d\s]" ) ) // match every non-period, non-digit, non-whitespace
+         foreach ( Match match in Regex.Matches( grid[ 0 ], @"[^.\d\s]" ) ) // match every non-period, non-digit, non-whitespace
          {
             symbolsList.Add( new KeyValuePair<int, int>( 0, match.Index ) ); // coords of all non-period symbols in the two lines
          }
 
          Dictionary<int, int> firstRowNumberAndIndex = new Dictionary<int, int>();
-         foreach( Match match in Regex.Matches( grid[ 0 ], @"(?:\D|^)(\d+)(?:\D|$)" ) )
+         foreach ( Match match in Regex.Matches( grid[ 0 ], @"(?:\D|^)(\d+)(?:\D|$)" ) )
          {
             firstRowNumberAndIndex.Add( match.Groups[ 1 ].Index, int.Parse( match.Groups[ 1 ].Value ) );
          }
 
-         foreach( var number in firstRowNumberAndIndex )
+         foreach ( var number in firstRowNumberAndIndex )
          {
-            if( IsAdjacent( new KeyValuePair<KeyValuePair<int, int>, int>( number, 0 ), grid, symbolsList ) )
+            if ( IsAdjacent( new KeyValuePair<KeyValuePair<int, int>, int>( number, 0 ), grid, symbolsList ) )
             {
                //Console.WriteLine( $"Adjacent number: {number.Value}" );
                numberSum += number.Value;
@@ -109,14 +108,14 @@ namespace AdventOfCode2023
          {
             List<StarLocation> starSymbolLocations = new List<StarLocation>();
             List<NumberLocation> numberLocations = new List<NumberLocation>();
-            if( isFirstRun )
+            if ( isFirstRun )
             {
-               for( int j = grid[ 0 ].IndexOf( '*' ); j > -1; j = grid[ 0 ].IndexOf( '*', j + 1 ) )
+               for ( int j = grid[ 0 ].IndexOf( '*' ); j > -1; j = grid[ 0 ].IndexOf( '*', j + 1 ) )
                {
                   starSymbolLocations.Add( new StarLocation( 0, j ) );
                }
 
-               for( int j = grid[ 1 ].IndexOf( '*' ); j > -1; j = grid[ 1 ].IndexOf( '*', j + 1 ) )
+               for ( int j = grid[ 1 ].IndexOf( '*' ); j > -1; j = grid[ 1 ].IndexOf( '*', j + 1 ) )
                {
                   starSymbolLocations.Add( new StarLocation( 1, j ) );
                }
@@ -124,40 +123,41 @@ namespace AdventOfCode2023
             }
             else
             {
-               for( int j = grid[ 1 ].IndexOf( '*' ); j > -1; j = grid[ 1 ].IndexOf( '*', j + 1 ) )
+               for ( int j = grid[ 1 ].IndexOf( '*' ); j > -1; j = grid[ 1 ].IndexOf( '*', j + 1 ) )
                {
                   starSymbolLocations.Add( new StarLocation( 1, j ) );
                }
             }
-            for( int i = 0; i < grid.Count; i++ )
+            for ( int i = 0; i < grid.Count; i++ )
             {
-               foreach( Match match in Regex.Matches( grid[ i ], @"(?:\D|^|)(\d+)(?:\D|$)" ) )
+               foreach ( Match match in Regex.Matches( grid[ i ], @"(?:\D|^|)(\d+)(?:\D|$)" ) )
                {
                   numberLocations.Add( new NumberLocation( i, match.Groups[ 1 ].Index, int.Parse( match.Groups[ 1 ].Value ) ) );
                }
             }
 
-            foreach( StarLocation star in starSymbolLocations )
+            foreach ( StarLocation star in starSymbolLocations )
             {
-               foreach( NumberLocation number in numberLocations )
+               foreach ( NumberLocation number in numberLocations )
                {
-                  if( IsAdjacentToStar( number, star ) )
+                  if ( IsAdjacentToStar( number, star ) )
                   {
                      star.AdjacentNums.Add( number.Number );
                   }
                }
             }
 
-            foreach( StarLocation star in starSymbolLocations )
+            foreach ( StarLocation star in starSymbolLocations )
             {
-               if( star.AdjacentNums.Count == 2 )
+               if ( star.AdjacentNums.Count == 2 )
                {
                   gearSum += star.AdjacentNums[ 0 ] * star.AdjacentNums[ 1 ];
                }
             }
+
             grid[ 0 ] = grid[ 1 ];
             grid[ 1 ] = grid[ 2 ];
-         } while( ( grid[ 2 ] = reader.ReadLine() ) != null );
+         } while ( ( grid[ 2 ] = reader.ReadLine() ) != null );
 
          return gearSum;
       }
@@ -171,42 +171,42 @@ namespace AdventOfCode2023
           * number => number.Key.Key = index | number.Key.Value = number | number.Value = grid line 0 or 1
           */
          //Console.WriteLine( $"Checking number {number.Key.Value}" );
-         if( grid.Count > 1 ) // really only gonna be 1 or 2
+         if ( grid.Count > 1 ) // really only gonna be 1 or 2
          {
             List<int> firstRowSymbols = ( from kvp in symbolsList where kvp.Key == 0 select kvp.Value ).ToList() ?? new List<int>();
             List<int> secondRowSymbols = ( from kvp in symbolsList where kvp.Key == 1 select kvp.Value ).ToList() ?? new List<int>();
-            if( number.Value == 0 )
+            if ( number.Value == 0 )
             {
                int numEndIndex = number.Key.Key + number.Key.Value.ToString().Length - 1;
-               foreach( int firstRowSymbolIndex in firstRowSymbols )
+               foreach ( int firstRowSymbolIndex in firstRowSymbols )
                {
-                  if( number.Key.Key == 0 )
+                  if ( number.Key.Key == 0 )
                   {
-                     if( firstRowSymbolIndex == numEndIndex + 1 ) { return true; }
+                     if ( firstRowSymbolIndex == numEndIndex + 1 ) { return true; }
                   }
-                  else if( numEndIndex + 1 == grid[ 0 ].Length )
+                  else if ( numEndIndex + 1 == grid[ 0 ].Length )
                   {
-                     if( firstRowSymbolIndex == number.Key.Key - 1 ) { return true; }
+                     if ( firstRowSymbolIndex == number.Key.Key - 1 ) { return true; }
                   }
                   else
                   {
-                     if( ( firstRowSymbolIndex == numEndIndex + 1 ) || (firstRowSymbolIndex == number.Key.Key - 1 ) ) { return true; }
+                     if ( ( firstRowSymbolIndex == numEndIndex + 1 ) || ( firstRowSymbolIndex == number.Key.Key - 1 ) ) { return true; }
                   }
                }
 
-               foreach( int secondRowSymbolIndex in secondRowSymbols )
+               foreach ( int secondRowSymbolIndex in secondRowSymbols )
                {
-                  if( number.Key.Key == 0 )
+                  if ( number.Key.Key == 0 )
                   {
-                     if( secondRowSymbolIndex >= number.Key.Key && secondRowSymbolIndex <= numEndIndex + 1 ) { return true; }
+                     if ( secondRowSymbolIndex >= number.Key.Key && secondRowSymbolIndex <= numEndIndex + 1 ) { return true; }
                   }
-                  else if(numEndIndex + 1 == grid[ 0 ].Length )
+                  else if ( numEndIndex + 1 == grid[ 0 ].Length )
                   {
-                     if( secondRowSymbolIndex >= number.Key.Key - 1 && secondRowSymbolIndex <= numEndIndex ) { return true; }
+                     if ( secondRowSymbolIndex >= number.Key.Key - 1 && secondRowSymbolIndex <= numEndIndex ) { return true; }
                   }
                   else
                   {
-                     if( secondRowSymbolIndex >= number.Key.Key - 1 && secondRowSymbolIndex <= numEndIndex + 1 ) { return true; }
+                     if ( secondRowSymbolIndex >= number.Key.Key - 1 && secondRowSymbolIndex <= numEndIndex + 1 ) { return true; }
                   }
                }
 
@@ -215,19 +215,19 @@ namespace AdventOfCode2023
             else
             {
                int numEndIndex = number.Key.Key + number.Key.Value.ToString().Length - 1;
-               foreach( int firstRowSymbolIndex in firstRowSymbols )
+               foreach ( int firstRowSymbolIndex in firstRowSymbols )
                {
-                  if( number.Key.Key == 0 )
+                  if ( number.Key.Key == 0 )
                   {
-                     if( firstRowSymbolIndex >= number.Key.Key && firstRowSymbolIndex <= numEndIndex + 1 ) { return true; }
+                     if ( firstRowSymbolIndex >= number.Key.Key && firstRowSymbolIndex <= numEndIndex + 1 ) { return true; }
                   }
-                  else if( numEndIndex + 1 == grid[ 0 ].Length )
+                  else if ( numEndIndex + 1 == grid[ 0 ].Length )
                   {
-                     if( firstRowSymbolIndex >= number.Key.Key - 1 && firstRowSymbolIndex <= numEndIndex ) { return true; }
+                     if ( firstRowSymbolIndex >= number.Key.Key - 1 && firstRowSymbolIndex <= numEndIndex ) { return true; }
                   }
                   else
                   {
-                     if( firstRowSymbolIndex >= number.Key.Key - 1 && firstRowSymbolIndex <= numEndIndex + 1 ) { return true; }
+                     if ( firstRowSymbolIndex >= number.Key.Key - 1 && firstRowSymbolIndex <= numEndIndex + 1 ) { return true; }
                   }
                }
 
@@ -238,19 +238,19 @@ namespace AdventOfCode2023
          {
             int numEndIndex = number.Key.Key + number.Key.Value.ToString().Length - 1;
             List<int> firstRowSymbols = ( from kvp in symbolsList where kvp.Key == 0 select kvp.Value ).ToList() ?? new List<int>();
-            foreach( int firstRowSymbolIndex in firstRowSymbols )
+            foreach ( int firstRowSymbolIndex in firstRowSymbols )
             {
-               if( number.Key.Key == 0 )
+               if ( number.Key.Key == 0 )
                {
-                  if( firstRowSymbolIndex == numEndIndex + 1 ) { return true; }
+                  if ( firstRowSymbolIndex == numEndIndex + 1 ) { return true; }
                }
-               else if( numEndIndex + 1 == grid[ 0 ].Length )
+               else if ( numEndIndex + 1 == grid[ 0 ].Length )
                {
-                  if( firstRowSymbolIndex == number.Key.Key - 1 ) { return true; }
+                  if ( firstRowSymbolIndex == number.Key.Key - 1 ) { return true; }
                }
                else
                {
-                  if( ( firstRowSymbolIndex == numEndIndex + 1 ) || (firstRowSymbolIndex == number.Key.Key - 1 ) ) { return true; }
+                  if ( ( firstRowSymbolIndex == numEndIndex + 1 ) || ( firstRowSymbolIndex == number.Key.Key - 1 ) ) { return true; }
                }
             }
 
@@ -261,34 +261,34 @@ namespace AdventOfCode2023
       internal static bool IsAdjacentToStar( NumberLocation number, StarLocation star )
       {
          int numMaxIndex = number.Index + number.Number.ToString().Length - 1;
-         if( star.Line == 1 ) 
+         if ( star.Line == 1 )
          {
-            if( number.Line != 1 ) // top or bottom lines (0 & 2)
+            if ( number.Line != 1 ) // top or bottom lines (0 & 2)
             {
-               if( star.Index >= number.Index - 1 && star.Index <= numMaxIndex + 1 ) { return true; }
+               if ( star.Index >= number.Index - 1 && star.Index <= numMaxIndex + 1 ) { return true; }
             }
             else
             {
-               if( star.Index == number.Index - 1 || star.Index == numMaxIndex + 1 ) { return true; }
+               if ( star.Index == number.Index - 1 || star.Index == numMaxIndex + 1 ) { return true; }
             }
 
             return false;
          }
 
-         if( star.Line == 0 ) // only in first run through (in hindsight completely unnecessary as input file doesn't include a * in first row, but anyways)
+         if ( star.Line == 0 ) // only in first run through (in hindsight completely unnecessary as input file doesn't include a * in first row, but anyways)
          {
-            if( Math.Abs( number.Line - star.Line ) == 2 ) // case of first runthrough where checking number in 3rd row vs star in 1st
+            if ( Math.Abs( number.Line - star.Line ) == 2 ) // case of first runthrough where checking number in 3rd row vs star in 1st
             {
                return false;
             }
 
-            if( number.Line == 0 )
+            if ( number.Line == 0 )
             {
-               if( star.Index == number.Index - 1 || star.Index == numMaxIndex + 1 ) { return true; }
+               if ( star.Index == number.Index - 1 || star.Index == numMaxIndex + 1 ) { return true; }
             }
             else // 1
             {
-               if( star.Index >= number.Index - 1 && star.Index <= numMaxIndex + 1 ) { return true; }
+               if ( star.Index >= number.Index - 1 && star.Index <= numMaxIndex + 1 ) { return true; }
             }
 
             return false;
