@@ -107,7 +107,7 @@ namespace AdventOfCode2023
                      }
                      else
                      {
-                        copyCardList.Add( cardNumIterator, 2 );
+                        copyCardList.Add( cardNumIterator, 1 + copyCardList[ currentCardNumber ] );
                      }
 
                      cardNumIterator++;
