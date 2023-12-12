@@ -61,25 +61,21 @@ namespace AdventOfCode2023
          return minLocation;
       }
 
+      /*
+       * (was just the first pair)
+       */
       public static long SecondPuzzle()
       {
          StreamReader reader = new StreamReader( Helper.GetInputDirectory( "day5input.txt" ) );
 
          string seeds = reader.ReadLine();
          long[] seedsInitialList = seeds.Substring( seeds.IndexOf( ':' ) + 2 ).Split( ' ' ).Select( long.Parse ).ToArray();
-         List<long> seedsList = new List<long>();
-         for( int i = 0; i < seedsInitialList.Length; i+=2 )
-         {
-            for( long j = seedsInitialList[ i ]; j < seedsInitialList[ i ] + seedsInitialList[ i + 1 ] - 1; j++ )
-            {
-               seedsList.Add( j );
-            }
-         }
-         List<long> processedVals = new List<long>();
          string line;
          bool startCapturingData = false;
+         List<List<Converter>> fullConversionList = new List<List<Converter>>();
          while( ( line = reader.ReadLine() ) != null )
          {
+            
             if( startCapturingData )
             {
                List<Converter> convertingList = new List<Converter>();
@@ -91,10 +87,7 @@ namespace AdventOfCode2023
                   line = reader.ReadLine();
                } while( line != null && line.Any( char.IsDigit ) );
 
-               // do the data process for this set of conversions
-               if( processedVals.Count == 0 ) { processedVals = ProcessConversions( seedsList, convertingList ); }
-               else { processedVals = ProcessConversions( processedVals, convertingList ); }
-
+               fullConversionList.Add( convertingList );
                startCapturingData = false;
             }
             else
@@ -106,15 +99,33 @@ namespace AdventOfCode2023
             }
          }
 
-         long minLocation = processedVals[ 0 ];
-         foreach( long processedVal in processedVals )
+         long minLocation = -1;
+         for( int i = 0; i < seedsInitialList.Length; i+=2 )
          {
-            if( processedVal < minLocation )
+            for( long j = seedsInitialList[ i ]; j < seedsInitialList[ i ] + seedsInitialList[ i + 1 ] - 1; j++ )
             {
-               minLocation = processedVal;
+               long processedVal = -1;
+               for( int k = 0; k < fullConversionList.Count; k++ )
+               {
+                  // do the data process for this set of conversions
+                  if( processedVal == -1 ) { processedVal = ProcessConversion( j, fullConversionList[ k ] ); }
+                  else { processedVal = ProcessConversion( processedVal, fullConversionList[ k ] ); }
+               }
+               
+               if( minLocation == -1 )
+               {
+                  minLocation = processedVal;
+               }
+               else
+               {
+                  if( processedVal < minLocation )
+                  {
+                     minLocation = processedVal;
+                  }
+               }
             }
          }
-
+         
          return minLocation;
       }
 
@@ -142,6 +153,22 @@ namespace AdventOfCode2023
          }
 
          return outputVals;
+      }
+
+      internal static long ProcessConversion( long inputVal, List<Converter> conversionVals )
+      {
+         long outputVal = inputVal;
+         foreach( Converter conv in conversionVals )
+         {
+            long maxVal = conv.Source + conv.Range - 1;
+            if( inputVal >= conv.Source && inputVal <= maxVal )
+            {
+               outputVal = inputVal + ( conv.Destination - conv.Source );
+               break;
+            }
+         }
+
+         return outputVal;
       }
    }
 

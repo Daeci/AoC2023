@@ -15,7 +15,7 @@ namespace AdventOfCode2023
          //Console.WriteLine( $"Day 4 first puzzle: {Day4.FirstPuzzle()}" );
          //Console.WriteLine( $"Day 4 second puzzle: {Day4.SecondPuzzle()}" );
          //Console.WriteLine( $"Day 5 first puzzle: {Day5.FirstPuzzle()}" );
-         Console.WriteLine( $"Day 5 second puzzle: {Day5.SecondPuzzle()}" );
+         //Console.WriteLine( $"Day 5 second puzzle: {Day5.SecondPuzzle()}" );
       }
    }
 }
